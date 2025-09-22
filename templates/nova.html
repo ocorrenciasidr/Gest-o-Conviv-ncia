@@ -92,34 +92,40 @@
 document.getElementById('sala').addEventListener('change', function(){
   const sala = this.value;
   const alunoSel = document.getElementById('aluno');
+  const tutorInput = document.getElementById('tutor');
+
   alunoSel.innerHTML = '<option value="">Carregando...</option>';
+  tutorInput.value = '';
+
   if(sala){
-    fetch(`/api/alunos/${encodeURIComponent(sala)}`)
-      .then(r=>r.json())
-      .then(lista=>{
-        alunoSel.innerHTML = '<option value="">Selecione</option>';
-        lista.forEach(a=>{
-          const op=document.createElement('option');
-          op.value=a; op.textContent=a;
-          alunoSel.appendChild(op);
-        });
+    fetch(`/api/alunos_sala/${encodeURIComponent(sala)}`)
+      .then(r => r.json())
+      .then(lista => {
+        alunoSel.innerHTML = '';
+        if(lista.length === 0){
+          alunoSel.innerHTML = '<option value="">Nenhum aluno encontrado</option>';
+        } else {
+          alunoSel.innerHTML = '<option value="">Selecione</option>';
+          lista.forEach(item => {
+            const op = document.createElement('option');
+            op.value = item.Aluno;
+            op.textContent = item.Aluno;
+            op.dataset.tutor = item.Tutor || '';
+            alunoSel.appendChild(op);
+          });
+        }
       })
-      .catch(()=>{ alunoSel.innerHTML='<option value="">Erro</option>'; });
+      .catch(() => {
+        alunoSel.innerHTML = '<option value="">Erro ao carregar alunos</option>';
+      });
   } else {
-    alunoSel.innerHTML='<option value="">Selecione uma sala primeiro</option>';
+    alunoSel.innerHTML = '<option value="">Selecione uma sala primeiro</option>';
   }
 });
 
 document.getElementById('aluno').addEventListener('change', function(){
-  const aluno = this.value;
-  if(aluno){
-    fetch(`/api/tutor/${encodeURIComponent(aluno)}`)
-      .then(r=>r.json())
-      .then(d=>{ document.getElementById('tutor').value = d.tutor || ''; })
-      .catch(()=>{ document.getElementById('tutor').value=''; });
-  } else {
-    document.getElementById('tutor').value='';
-  }
+  const tutor = this.options[this.selectedIndex].dataset.tutor || '';
+  document.getElementById('tutor').value = tutor;
 });
 </script>
 </body>
